@@ -19,6 +19,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, field_validator
 
 DB_PATH = Path(__file__).parent / "habits.db"
+BAD_DAY_MESSAGE = "day must be a valid ISO date (YYYY-MM-DD)"
 
 app = FastAPI(title="Habit Tracker")
 
@@ -68,9 +69,9 @@ class CheckinIn(BaseModel):
         try:
             parsed = date.fromisoformat(v)
         except ValueError as err:
-            raise ValueError("day must be a valid ISO date (YYYY-MM-DD)") from err
+            raise ValueError(BAD_DAY_MESSAGE) from err
         if parsed.isoformat() != v:
-            raise ValueError("day must be a valid ISO date (YYYY-MM-DD)")
+            raise ValueError(BAD_DAY_MESSAGE)
         return v
 
 
