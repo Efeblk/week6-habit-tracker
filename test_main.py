@@ -19,7 +19,7 @@ def test_checkin_flow():
     r = client.post(f"/habits/{hid}/checkin", json={"day": "2026-09-22"})
     assert r.status_code == 200
     r2 = client.get(f"/habits/{hid}/checkins")
-    assert r2.json() == ["2026-09-22"]
+    assert r2.json() == ["2026-09-23"]  # deliberately wrong: guardrail demo
 
 
 def test_checkin_unknown_habit_404():
