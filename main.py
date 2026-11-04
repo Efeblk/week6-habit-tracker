@@ -12,12 +12,14 @@ Test:
 
 import sqlite3
 from contextlib import closing
+from datetime import date
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 DB_PATH = Path(__file__).parent / "habits.db"
+BAD_DAY_MESSAGE = "day must be a valid ISO date (YYYY-MM-DD)"
 
 app = FastAPI(title="Habit Tracker")
 
@@ -49,9 +51,28 @@ init_db()
 class HabitIn(BaseModel):
     name: str
 
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        cleaned = v.strip()
+        if not cleaned:
+            raise ValueError("habit name must not be empty")
+        return cleaned
+
 
 class CheckinIn(BaseModel):
     day: str  # ISO date, e.g. "2026-09-22"
+
+    @field_validator("day")
+    @classmethod
+    def validate_day(cls, v: str) -> str:
+        try:
+            parsed = date.fromisoformat(v)
+        except ValueError as err:
+            raise ValueError(BAD_DAY_MESSAGE) from err
+        if parsed.isoformat() != v:
+            raise ValueError(BAD_DAY_MESSAGE)
+        return v
 
 
 @app.post("/habits")
